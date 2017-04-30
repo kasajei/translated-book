@@ -16,3 +16,4 @@ django-rest-swagger==0.3.5
 pytz==2016.10
 django-webpack-loader==0.4.1
 git+https://github.com/kasajei/pyndlsearch.git#egg=pyndlsearch
+requests_toolbelt

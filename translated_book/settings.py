@@ -42,6 +42,9 @@ INSTALLED_APPS = (
     'djangae.contrib.gauth.datastore',
     'djangae.contrib.security',
     'translated_book',
+    'rest_framework',
+    'rest_framework_swagger',
+    'book',
     # 'djangae.contrib.uniquetool',
 )
 
@@ -100,9 +103,9 @@ WSGI_APPLICATION = 'translated_book.wsgi.application'
 # Internationalization
 # https://docs.djangoproject.com/en/1.6/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'ja-JP'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Tokyo'
 
 USE_I18N = True
 
@@ -125,9 +128,9 @@ CSP_DEFAULT_SRC = ("'self'", "*.gstatic.com")
 CSP_STYLE_SRC = ("'self'", "'unsafe-inline'", "fonts.googleapis.com", "*.gstatic.com")
 CSP_FONT_SRC = ("'self'", "themes.googleusercontent.com", "*.gstatic.com")
 CSP_FRAME_SRC = ("'self'", "www.google.com", "www.youtube.com", "accounts.google.com", "apis.google.com", "plus.google.com")
-CSP_SCRIPT_SRC = ("'self'", "*.googleanalytics.com", "*.google-analytics.com", "ajax.googleapis.com")
+CSP_SCRIPT_SRC = ("'self'", "*.googleanalytics.com", "*.google-analytics.com", "ajax.googleapis.com", "'unsafe-inline'", "localhost:3000")
 CSP_IMG_SRC = ("'self'", "data:", "s.ytimg.com", "*.googleusercontent.com", "*.gstatic.com", "www.google-analytics.com")
-CSP_CONNECT_SRC = ("'self'", "plus.google.com", "www.google-analytics.com")
+CSP_CONNECT_SRC = ("'self'", "plus.google.com", "www.google-analytics.com", "localhost:3000","ws://localhost:3000")
 
 
 from djangae.contrib.gauth.settings import *
