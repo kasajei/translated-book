@@ -59,3 +59,7 @@ npm-debug.log
 # webpack
 assets/bundles/
 webpack-stats.json
+
+
+# env
+translated_book/env.py

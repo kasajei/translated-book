@@ -133,4 +133,9 @@ CSP_IMG_SRC = ("'self'", "data:", "s.ytimg.com", "*.googleusercontent.com", "*.g
 CSP_CONNECT_SRC = ("'self'", "plus.google.com", "www.google-analytics.com", "localhost:3000","ws://localhost:3000")
 
 
+from env import *
+AMAZON_ACCESS_KEY = AmazonAccessKeyId
+AMAZON_ACCESS_SECRET = AmazonSecretKey
+AMAZON_ACCOS_TAG = AmazonAssociateTag
+
 from djangae.contrib.gauth.settings import *
