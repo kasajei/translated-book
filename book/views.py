@@ -40,6 +40,7 @@ class SearchView(APIView):
         title = request.GET.get("title", "")
         isbn = request.GET.get("isbn", "")
         creator = request.GET.get("author", "")
+        logging.info("title =>" + title)
 
         cql = CQL()
         cql.title = title.encode("utf-8")

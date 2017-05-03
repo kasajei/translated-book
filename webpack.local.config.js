@@ -3,11 +3,10 @@ var BundleTracker = require('webpack-bundle-tracker');
 
 var config = require('./webpack.config.js');
 
-config.entry = [
+config.entry = config.entry.concat([
     'webpack-dev-server/client?http://localhost:3000',
-    'webpack/hot/only-dev-server',
-    './assets/js/index.jsx'
-];
+    'webpack/hot/only-dev-server'
+]);
 
 config.devtool = 'inline-source-map';
 

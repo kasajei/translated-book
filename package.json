@@ -12,14 +12,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/kasajei/djangae-react-blog.git"
+    "url": "git+https://github.com/kasajei/translated-book.git"
   },
   "author": "kasajei",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/kasajei/djangae-react-blog/issues"
+    "url": "https://github.com/kasajei/translated-book/issues"
   },
-  "homepage": "https://github.com/kasajei/djangae-react-blog#readme",
+  "homepage": "https://github.com/kasajei/translated-book#readme",
   "devDependencies": {
     "apisauce": "^0.11.0",
     "babel": "^6.23.0",

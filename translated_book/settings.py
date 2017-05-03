@@ -41,6 +41,7 @@ INSTALLED_APPS = (
     'cspreports',
     'djangae.contrib.gauth.datastore',
     'djangae.contrib.security',
+    'webpack_loader',
     'translated_book',
     'rest_framework',
     'rest_framework_swagger',
@@ -63,6 +64,7 @@ MIDDLEWARE_CLASSES = (
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': ["templates"],
         'OPTIONS': {
             'context_processors': [
                 "django.contrib.auth.context_processors.auth",
@@ -120,7 +122,15 @@ USE_TZ = True
 # Using a route that is not caught by appengines routing in app.yaml
 STATIC_URL = '/static-dev/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
-
+STATICFILES_DIRS = (
+    os.path.join(BASE_DIR, 'assets'),
+)
+WEBPACK_LOADER = {
+    'DEFAULT': {
+        'BUNDLE_DIR_NAME': 'bundles/',
+        'STATS_FILE': os.path.join(BASE_DIR, 'webpack-stats.json'),
+    }
+}
 # sensible default CSP settings, feel free to modify them
 CSP_DEFAULT_SRC = ("'self'", "*.gstatic.com")
 # Inline styles are unsafe, but Django error pages use them. We later remove
@@ -130,7 +140,7 @@ CSP_FONT_SRC = ("'self'", "themes.googleusercontent.com", "*.gstatic.com")
 CSP_FRAME_SRC = ("'self'", "www.google.com", "www.youtube.com", "accounts.google.com", "apis.google.com", "plus.google.com")
 CSP_SCRIPT_SRC = ("'self'", "*.googleanalytics.com", "*.google-analytics.com", "ajax.googleapis.com", "'unsafe-inline'", "localhost:3000")
 CSP_IMG_SRC = ("'self'", "data:", "s.ytimg.com", "*.googleusercontent.com", "*.gstatic.com", "www.google-analytics.com")
-CSP_CONNECT_SRC = ("'self'", "plus.google.com", "www.google-analytics.com", "localhost:3000","ws://localhost:3000")
+CSP_CONNECT_SRC = ("'self'", "plus.google.com", "www.google-analytics.com", "localhost:3000", "ws://localhost:3000")
 
 
 from env import *

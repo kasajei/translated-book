@@ -20,6 +20,11 @@ SECURE_REDIRECT_EXEMPT = [
 
 DEBUG = False
 
+WEBPACK_LOADER['DEFAULT'].update({
+    'BUNDLE_DIR_NAME': 'dist/',
+    'STATS_FILE': os.path.join(BASE_DIR, 'webpack-stats-prod.json')
+})
+
 # Remove unsafe-inline from CSP_STYLE_SRC. It's there in default to allow
 # Django error pages in DEBUG mode render necessary styles
 if "'unsafe-inline'" in CSP_STYLE_SRC:
