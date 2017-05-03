@@ -25,7 +25,7 @@ export const INITIAL_STATE = Immutable({
   error: null,
 });
 
-export const search = (state) =>
+export const searchRequest = (state, {isbn, title, author}) =>
   state.merge({ fetching: true, books: [], original_book:null, translated_book:null, other_books:[]});
 
 // successful temperature lookup
@@ -34,13 +34,24 @@ export const searchSuccess = (state, action) => {
   return state.merge({ fetching: false, error: null, books });
 };
 
+export const amazonRequest = (state, {title, original_title}) =>
+  state.merge({ fetching: true, original_book:null, translated_book:null, other_books:[]});
+
+export const amazonSuccess = (state, action) => {
+  const { original_book, translated_book, other_books } = action;
+  return state.merge({ fetching: false, error: null, original_book, translated_book, other_books });
+};
+
+
 // failed to get the temperature
 export const requestFailure = (state) =>
   state.merge({ fetching: false, error: true, books: [] ,original_book:null, translated_book:null, other_books:[]});
 
 
 export const reducer = createReducer(INITIAL_STATE, {
-  [Types.SEARCH_REQUEST]: search,
+  [Types.SEARCH_REQUEST]: searchRequest,
   [Types.SEARCH_SUCCESS]: searchSuccess,
   [Types.REQUEST_FAILURE]: requestFailure,
+  [Types.AMAZON_REQUEST]: amazonRequest,
+  [Types.AMAZON_SUCCESS]: amazonSuccess,
 });

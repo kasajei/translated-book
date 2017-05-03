@@ -107,17 +107,21 @@ class AmazonView(APIView):
         return
 
 
-    def remove_not_book(self, products):
+    def remove(self, products):
         books = []
+        ids = []
         for product in products:
-            if u"Book" in product.get_attribute("ProductGroup"):
+            product.id = product.isbn if product.isbn else product.eisbn
+            if u"Book" in product.get_attribute("ProductGroup") and product.id not in ids:
                 books.append(product)
+                ids.append(product.id)
         return books
 
 
     def serialize_product(self, product):
         is_review, review_url = product.reviews
         return {
+            "id": product.id,
             "title": product.title,
             "isbn": product.isbn,
             "eisbn": product.eisbn,
@@ -151,7 +155,7 @@ class AmazonView(APIView):
             ErrorHandler=self.error_handler
         )
         products = amazon.search_n(20, Keywords=u'"'+title+u'"|"'+original_title+u'"', SearchIndex='All')
-        products = self.remove_not_book(products)
+        products = self.remove(products)
         translated_product = self.most_similarity_product(products, title)
         if translated_product:
             products.remove(translated_product)
