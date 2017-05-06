@@ -181,8 +181,8 @@ class MainView extends React.Component{
       )
     }else if(this.props.fetching) {
       return (
-        <div className="column">
-          <button className="button is-loading is-large is-expanded">読み込んでいます。読み込んでいます。読み込んでいます</button>
+        <div className="column has-text-centered">
+          <button className="button is-loading is-large is-expanded has-text-centered ">読み込んでいます</button>
         </div>
       )
     }else if(this.state.error){
@@ -210,8 +210,8 @@ class MainView extends React.Component{
             <div className="container">
               <h1 className="title has-text-centered">翻訳本サーチα</h1>
               <h2 className="subtitle has-text-centered">探しづらい翻訳本を一発検索(したい)</h2>
-                <div className="field has-addons is-8 column is-offset-2">
-                  <p className="control">
+                <div className="field has-addons column has-addons-centered">
+                  <p className="control ">
                     <span className="select">
                       <select onChange={this.selectSearchOption}>
                         <option value="title">タイトル</option>
@@ -220,8 +220,8 @@ class MainView extends React.Component{
                       </select>
                     </span>
                   </p>
-                  <p className="control is-expanded ">
-                  <input className="input is-primary" type="text" placeholder="で探す" onChange={this.changeText} onKeyPress={this.handleKeyPress}/>
+                  <p className="control">
+                  <input className="input is-primary" size="54" type="text" placeholder="で探す" onChange={this.changeText} onKeyPress={this.handleKeyPress}/>
                   </p>
                   <p className="control">
                   <button className={`button is-primary ${this.props.fetching ? "is-loading" : ""}`} onClick={this.search}>検索</button>
