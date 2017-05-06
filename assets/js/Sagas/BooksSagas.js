@@ -11,10 +11,6 @@ export function * searchBooks (api, action) {
   if (response.ok) {
     const books = response.data.books;
     yield put(BooksActions.searchSuccess(books));
-    if (books.length > 0) {
-      const book = books[0];
-      yield put(BooksActions.amazonRequest(book.title, book.original_title));
-    }
   } else {
     yield put(BooksActions.requestFailure());
   }

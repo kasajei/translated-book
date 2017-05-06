@@ -4,7 +4,10 @@
 
 import apisauce from 'apisauce'
 
-const create = (baseURL = 'http://localhost:8000/api/v1/') => {
+const host = window.location.host.split(':')[0];
+const ROOT_URL = (process.env.NODE_ENV == "production" ? 'https://' + host : 'http://' + host+':8000') + '/api/v1';
+
+const create = (baseURL = ROOT_URL) => {
   const api = apisauce.create({
     baseURL,
     timeout: 10000

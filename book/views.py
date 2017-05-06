@@ -2,6 +2,7 @@
 import logging
 
 import time
+import uuid
 from urllib2 import HTTPError
 
 from amazon.api import AmazonAPI
@@ -40,7 +41,6 @@ class SearchView(APIView):
         title = request.GET.get("title", "")
         isbn = request.GET.get("isbn", "")
         creator = request.GET.get("author", "")
-        logging.info("title =>" + title)
 
         cql = CQL()
         cql.title = title.encode("utf-8")
@@ -68,6 +68,7 @@ class SearchView(APIView):
                 if original_title not in titles:
                     titles.append(original_title)
                     book = {
+                        "id": uuid.uuid4(),
                         "title": record.recordData.title,
                         "original_title": original_title,
                         "author": record.recordData.creator,
@@ -86,6 +87,14 @@ class AmazonView(APIView):
             time.sleep(1)  # 1秒待つ
             return True
 
+    def is_japanese(self, string):
+        for ch in string:
+            name = unicodedata.name(ch)
+            if "CJK UNIFIED" in name \
+            or "HIRAGANA" in name \
+            or "KATAKANA" in name:
+                return True
+        return False
 
     def formatted_text(self, text):
         text = re.sub(r"[!-/:-@[-`{-~]", "", text)
@@ -94,16 +103,27 @@ class AmazonView(APIView):
         text = unicodedata.normalize(u"NFKC", text)
         return text.lower()
 
-    def most_similarity_product(self, products, keyword):
-        keyword = self.formatted_text(keyword)
-        # for product in products:
-        #     title = self.formatted_text(product.title)
-        #     if keyword in title and u"Book" == product.get_attribute("ProductGroup"):
-        #         return product
+    def most_similarity_product(self, products, keyword, is_englsih=False):
+        formated_keyword = self.formatted_text(keyword)
         for product in products:
             title = self.formatted_text(product.title)
-            if keyword in title and u"Book" in product.get_attribute("ProductGroup"):
-                return product
+            if (formated_keyword in title or title in formated_keyword) and u"Book" in product.get_attribute("ProductGroup") and product.author:
+                if is_englsih:
+                    if not self.is_japanese(title):
+                        return product
+                else:
+                    return product
+        if not is_englsih:
+            for words in keyword.split(u":"):
+                logging.info(words)
+                for product in products:
+                    title = self.formatted_text(product.title)
+                    if self.formatted_text(words) in title and u"Book" in product.get_attribute("ProductGroup") and product.author:
+                        if is_englsih:
+                            if not self.is_japanese(title):
+                                return product
+                        else:
+                            return product
         return
 
 
@@ -111,7 +131,7 @@ class AmazonView(APIView):
         books = []
         ids = []
         for product in products:
-            product.id = product.isbn if product.isbn else product.eisbn
+            product.id = product.asin
             if u"Book" in product.get_attribute("ProductGroup") and product.id not in ids:
                 books.append(product)
                 ids.append(product.id)
@@ -122,6 +142,7 @@ class AmazonView(APIView):
         is_review, review_url = product.reviews
         return {
             "id": product.id,
+            "asin": product.asin,
             "title": product.title,
             "isbn": product.isbn,
             "eisbn": product.eisbn,
@@ -129,6 +150,8 @@ class AmazonView(APIView):
             "authors": product.authors,
             "review_url": review_url,
             "large_image_url": product.large_image_url,
+            "small_image_url": product.small_image_url,
+            "medium_image_url": product.medium_image_url,
             "offer_url": product.offer_url,
             "product_group": product.get_attribute("ProductGroup"),
         }
@@ -156,12 +179,12 @@ class AmazonView(APIView):
         )
         products = amazon.search_n(20, Keywords=u'"'+title+u'"|"'+original_title+u'"', SearchIndex='All')
         products = self.remove(products)
+        original_product = self.most_similarity_product(products, original_title, is_englsih=True)
+        if original_product:
+            products.remove(original_product)
         translated_product = self.most_similarity_product(products, title)
         if translated_product:
             products.remove(translated_product)
-        original_product = self.most_similarity_product(products, original_title)
-        if original_product:
-            products.remove(original_product)
         results = {
             "translated_product": self.serialize_product(translated_product) if translated_product else {},
             "original_product": self.serialize_product(original_product) if original_product else {},

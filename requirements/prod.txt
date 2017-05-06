@@ -1,5 +1,5 @@
 djangae==0.9.6
-django>=1.8,<1.10
+django==1.9.12
 git+https://github.com/mozilla/django-csp.git#egg=djangocsp
 git+https://github.com/adamalton/django-csp-reports.git#egg=cspreports
 django-session-csrf
@@ -18,3 +18,4 @@ django-webpack-loader==0.4.1
 git+https://github.com/kasajei/pyndlsearch.git#egg=pyndlsearch
 requests_toolbelt
 python-amazon-simple-product-api
+django-cors-headers

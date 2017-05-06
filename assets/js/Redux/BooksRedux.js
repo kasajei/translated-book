@@ -7,6 +7,7 @@ import Immutable from 'seamless-immutable'
 
 const { Types, Creators } = createActions({
   searchRequest: ["isbn", "title", "author"],
+  selectBook: ["book"],
   searchSuccess: ['books'],
   amazonRequest: ["title", "original_title"],
   amazonSuccess: ["original_book", "translated_book", 'other_books'],
@@ -18,6 +19,7 @@ export default Creators;
 
 export const INITIAL_STATE = Immutable({
   books: [],
+  selected_book: null,
   original_book: null,
   translated_book: null,
   other_books: [],
@@ -27,6 +29,10 @@ export const INITIAL_STATE = Immutable({
 
 export const searchRequest = (state, {isbn, title, author}) =>
   state.merge({ fetching: true, books: [], original_book:null, translated_book:null, other_books:[]});
+
+export const selectBook = (state, {book}) => {
+  return state.merge({selected_book: book});
+};
 
 // successful temperature lookup
 export const searchSuccess = (state, action) => {
@@ -50,6 +56,7 @@ export const requestFailure = (state) =>
 
 export const reducer = createReducer(INITIAL_STATE, {
   [Types.SEARCH_REQUEST]: searchRequest,
+  [Types.SELECT_BOOK]: selectBook,
   [Types.SEARCH_SUCCESS]: searchSuccess,
   [Types.REQUEST_FAILURE]: requestFailure,
   [Types.AMAZON_REQUEST]: amazonRequest,

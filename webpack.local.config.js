@@ -17,7 +17,10 @@ config.devServer = {
     port: 3000,
     historyApiFallback: true,
     hot: true,
-    inline: true
+    inline: true,
+    headers: {
+        'Access-Control-Allow-Origin': '*'
+    }
 };
 
 config.output.publicPath = 'http://localhost:3000/assets/bundles/';
