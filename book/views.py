@@ -148,6 +148,7 @@ class AmazonView(APIView):
             "eisbn": product.eisbn,
             "author": product.author,
             "authors": product.authors,
+            "publication_date": product.publication_date,
             "review_url": review_url,
             "large_image_url": product.large_image_url,
             "small_image_url": product.small_image_url,
