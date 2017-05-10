@@ -136,12 +136,18 @@ CSP_DEFAULT_SRC = ("'self'", "*.gstatic.com")
 # Inline styles are unsafe, but Django error pages use them. We later remove
 # `unsafe-inline` in settings_live.py
 CSP_STYLE_SRC = ("'self'", "'unsafe-inline'", "fonts.googleapis.com", "*.gstatic.com", "*.cloudflare.com", "*.bootstrapcdn.com")
-CSP_FONT_SRC = ("'self'", "themes.googleusercontent.com", "*.gstatic.com", "*.cloudflare.com", "*.bootstrapcdn.com")
+CSP_FONT_SRC = ("'self'", "themes.googleusercontent.com", "*.gstatic.com", "*.cloudflare.com", "*.bootstrapcdn.com", "'unsafe-inline'")
 CSP_FRAME_SRC = ("'self'", "www.google.com", "www.youtube.com", "accounts.google.com", "apis.google.com", "plus.google.com")
 CSP_SCRIPT_SRC = ("'self'", "*.googleanalytics.com", "*.google-analytics.com", "ajax.googleapis.com", "'unsafe-inline'", "localhost:3000")
 CSP_IMG_SRC = ("'self'", "data:", "s.ytimg.com", "*.googleusercontent.com", "*.gstatic.com", "www.google-analytics.com", "placeholdit.imgix.net", "*.ssl-images-amazon.com")
 CSP_CONNECT_SRC = ("'self'", "plus.google.com", "www.google-analytics.com", "localhost:8000", "localhost:3000", "ws://localhost:3000")
 
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        "translated_book.auth.CsrfExemptSessionAuthentication"
+    ],
+}
 
 from env import *
 AMAZON_ACCESS_KEY = AmazonAccessKeyId

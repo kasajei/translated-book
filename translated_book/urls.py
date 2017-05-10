@@ -26,7 +26,8 @@ urlpatterns = (
     url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     url(r'^docs/', include('rest_framework_swagger.urls')),
 
-    url(r'^api/v1/', include('book.urls')),
+    url(r'^api/v1/', include('book.urls.api')),
+    url(r'^tasks/', include('book.urls.task')),
     url(r'^$', TemplateView.as_view(template_name='index.html'), name='index'),
 )
 

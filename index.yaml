@@ -10,6 +10,32 @@ indexes:
 # automatically uploaded to the admin console when you next deploy
 # your application using appcfg.py.
 
+- kind: book_book
+  properties:
+  - name: publication_date
+    direction: desc
+  - name: __key__
+    direction: desc
+
+- kind: book_bookrelation
+  properties:
+  - name: original_book_id
+  - name: publication_date
+    direction: desc
+
+- kind: book_bookrelation
+  properties:
+  - name: publication_date
+    direction: desc
+  - name: __key__
+    direction: desc
+
+- kind: book_bookrelation
+  properties:
+  - name: translated_book_id
+  - name: publication_date
+    direction: desc
+
 - kind: cspreports_cspreport
   properties:
   - name: created

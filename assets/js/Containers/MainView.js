@@ -166,7 +166,7 @@ class MainView extends React.Component{
   renderOthers(){
     return(
       this.props.other_books.map(function (amazon) {
-        return <Amazon amazon={amazon} key={amazon.id}/>
+        return <Amazon amazon={amazon} key={amazon.asin}/>
       })
     )
   }

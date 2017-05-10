@@ -1,8 +1,16 @@
 application: translated-book
-version: 1
+version: 2
 runtime: python27
 api_version: 1
 threadsafe: true
+
+
+automatic_scaling:
+  min_idle_instances: automatic   # idle状態にあるインスタンスの最小値
+  max_idle_instances: 1                 # idle状態にあるインスタンスの最大値
+  min_pending_latency: 750ms  # リクエストを処理するまでに許される待ち時間の最小
+  max_pending_latency: automatic
+
 
 libraries:
 - name: lxml
@@ -19,6 +27,23 @@ handlers:
   script: translated_book.wsgi.application
   secure: always
 
+# library static file
+- url: /static/admin/
+  static_dir: sitepackages/django/contrib/admin/static/admin/
+  secure: optional
+  expiration: 30d
+
+
+- url: /static/rest_framework/
+  static_dir: sitepackages/rest_framework/static/rest_framework/
+  secure: optional
+  expiration: 30d
+
+- url: /static/rest_framework_swagger/
+  static_dir: sitepackages/rest_framework_swagger/static/rest_framework_swagger/
+  secure: optional
+  expiration: 30d
+
 - url: /static
   static_dir: static/
   secure: always
@@ -28,6 +53,18 @@ handlers:
   script: translated_book.wsgi.application
   secure: always
   login: admin
+
+- url: /docs.*
+  script: translated_book.wsgi.application
+  login: admin
+  secure: always
+
+
+- url: /tasks/.*
+  script: translated_book.wsgi.application
+  login: admin
+  secure: always
+
 
 - url: /.*
   script: translated_book.wsgi.application

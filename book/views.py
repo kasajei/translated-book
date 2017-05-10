@@ -2,6 +2,7 @@
 import logging
 
 import time
+import urllib
 import uuid
 from urllib2 import HTTPError
 
@@ -11,11 +12,13 @@ import re
 # Create your views here.
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from pyndlsearch.client import SRUClient
-from pyndlsearch.cql import CQL
 import requests_toolbelt.adapters.appengine
 import unicodedata
+from google.appengine.api.taskqueue import taskqueue
 
+from book.models import BookRelation
+from book.ndl.apis.opensearch import OpenSearch
+from book.serializers import BookRelationSerializer
 from translated_book.settings import AMAZON_ACCESS_KEY, AMAZON_ACCOS_TAG
 from translated_book.settings import AMAZON_ACCESS_SECRET
 
@@ -23,6 +26,21 @@ requests_toolbelt.adapters.appengine.monkeypatch()
 
 
 class SearchView(APIView):
+    def remove(self, books):
+        translated_books = []
+        for book in books:
+            if book.original_title and book.author and book.isbn:
+                translated_books.append(book)
+        return translated_books
+
+    def serialize(self, book):
+        return {
+            "title": book.title,
+            "original_title": book.original_title,
+            "author": book.author,
+            "isbn": book.isbn
+        }
+
     def get(self, request):
         """
         タイトルから
@@ -38,45 +56,25 @@ class SearchView(APIView):
                     type: string
                     paramType: query
         """
-        title = request.GET.get("title", "")
-        isbn = request.GET.get("isbn", "")
-        creator = request.GET.get("author", "")
+        title = request.GET.get("title", None)
+        isbn = request.GET.get("isbn", None)
+        creator = request.GET.get("author", None)
 
-        cql = CQL()
-        cql.title = title.encode("utf-8")
-        cql.isbn = isbn.encode("utf-8")
-        cql.creator = creator.encode("utf-8")
-        cql.mediatype = u"1"  # 本のみ
-
-        client = SRUClient(cql)
-        client.set_only_bib(True)
-        client.set_maximum_records(10)
-
-        srres = client.get_srresponse()
-
-        books = []
-        titles = []
-        for record in srres.records:
-            if record.recordData.description and u'原タイトル' in record.recordData.description:
-                original_title = ""
-                for text in record.recordData.description.split():
-                    match = re.match(r"[a-zA-Z0-9!-/-@¥[-`{-~]*", text)
-                    if len(match.group()) > 1:
-                        original_title += match.group() + " "
-                original_title = original_title.rstrip()
-                original_title = re.sub(r"[.:-@!]", "", original_title)
-                if original_title not in titles:
-                    titles.append(original_title)
-                    book = {
-                        "id": uuid.uuid4(),
-                        "title": record.recordData.title,
-                        "original_title": original_title,
-                        "author": record.recordData.creator,
-                    }
-                    books.append(book)
+        request = OpenSearch()
+        books = request.search(title, creator, isbn)
+        books = self.remove(books)
         results = {
-            "books": books
+            "books": [self.serialize(book) for book in books]
         }
+        for book in books:
+            taskqueue.add(
+                    url="/tasks/save/amazon/",
+                    params={
+                        u"title": book.title,
+                        u"original_title": book.original_title,
+                        u"isbn": book.isbn
+                    }
+                )
         return Response(results)
 
 
@@ -115,7 +113,6 @@ class AmazonView(APIView):
                     return product
         if not is_englsih:
             for words in keyword.split(u":"):
-                logging.info(words)
                 for product in products:
                     title = self.formatted_text(product.title)
                     if self.formatted_text(words) in title and u"Book" in product.get_attribute("ProductGroup") and product.author:
@@ -139,17 +136,12 @@ class AmazonView(APIView):
 
 
     def serialize_product(self, product):
-        is_review, review_url = product.reviews
         return {
-            "id": product.id,
             "asin": product.asin,
             "title": product.title,
             "isbn": product.isbn,
-            "eisbn": product.eisbn,
             "author": product.author,
-            "authors": product.authors,
             "publication_date": product.publication_date,
-            "review_url": review_url,
             "large_image_url": product.large_image_url,
             "small_image_url": product.small_image_url,
             "medium_image_url": product.medium_image_url,
@@ -168,9 +160,13 @@ class AmazonView(APIView):
                 -   name: original_title
                     type: string
                     paramType: query
+                -   name: isbn
+                    type: string
+                    paramType: query
         """
         title = request.GET.get("title", "")
         original_title = request.GET.get("original_title", "")
+        isbn = request.GET.get("isbn", None)
         amazon = AmazonAPI(
             AMAZON_ACCESS_KEY,
             AMAZON_ACCESS_SECRET,
@@ -178,17 +174,73 @@ class AmazonView(APIView):
             region="JP",
             ErrorHandler=self.error_handler
         )
-        products = amazon.search_n(20, Keywords=u'"'+title+u'"|"'+original_title+u'"', SearchIndex='All')
+        if isbn:
+            keyword = isbn
+        else:
+            keyword = u'"'+title+u'"|"'+original_title+u'"'
+
+        try:
+            logging.info(urllib.quote(keyword.encode("utf-8")))
+        except:
+            return Response()
+
+        products = amazon.search_n(20, Keywords=keyword, SearchIndex=u'All')
         products = self.remove(products)
+
+        isbn_product = None
+        if isbn:
+            isbn_product = products[0]
+
         original_product = self.most_similarity_product(products, original_title, is_englsih=True)
         if original_product:
             products.remove(original_product)
         translated_product = self.most_similarity_product(products, title)
         if translated_product:
             products.remove(translated_product)
+
         results = {
+            "isbn_product": self.serialize_product(isbn_product) if isbn_product else {},
             "translated_product": self.serialize_product(translated_product) if translated_product else {},
             "original_product": self.serialize_product(original_product) if original_product else {},
             "other_books": [self.serialize_product(product) for product in products]
         }
         return Response(results)
+
+
+class RecentBookView(APIView):
+    def get(self, request):
+        """
+        最新の翻訳本を取得する
+        ---
+        parameters:
+                -   name: sort_id
+                    type: string
+                    paramType: query
+                -   name: num
+                    type: integer
+                    paramType: query
+        """
+        page_size = int(request.GET.get("num"))
+        queryset = BookRelation.objects
+        if request.GET.get("sort_id"):
+            queryset = queryset.filter(sort_id__lt=request.GET.get("sort_id"))
+
+        queryset = queryset.prefetch_related(
+            "translated_book"
+        ).prefetch_related(
+            "original_book"
+        ).order_by("-sort_id")
+        queryset = queryset[:page_size]
+        queryset_json = BookRelationSerializer(
+            queryset,
+            many=True
+        ).data
+        last_sort_id = None
+        queryset_size = len(queryset_json)
+        if queryset_size == page_size:
+            last_sort_id = queryset_json[-1]["sort_id"]
+        resutls = {
+            "last_sort_id": last_sort_id,
+            "book_relations": queryset_json
+        }
+        return Response(resutls)

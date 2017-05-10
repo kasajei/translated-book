@@ -10,7 +10,7 @@ from book.ndl.models import BookData
 
 
 class OAIPMH(object):
-    URL = "http://iss.ndl.go.jp/api/oaipmh"
+    URL = "https://iss.ndl.go.jp/api/oaipmh"
 
     def __init__(self):
         """
@@ -49,9 +49,9 @@ class OAIPMH(object):
         list_records = root.find("{http://www.openarchives.org/OAI/2.0/}ListRecords")
         books = []
         for record in list_records:
-            book = BookData()
             metadata = record.find("{http://www.openarchives.org/OAI/2.0/}metadata")
             if metadata is not None:
+                book = BookData()
                 rdf_root = metadata[0]
                 title = rdf_root.find("{http://purl.org/dc/elements/1.1/}title")
                 book.title = title.text.encode("utf-8") if title is not None else None
@@ -95,9 +95,9 @@ class OAIPMH(object):
         return books
 
     def load_all(self):
-        all_books = request.load()
-        while request.has_next:
-            all_books.append(request.load_next())
+        all_books = self.load()
+        while self.has_next:
+            all_books += self.load_next()
         return all_books
 
 
@@ -107,7 +107,11 @@ if __name__ == '__main__':
     while request.has_next:
         print(request.load_next())
 
-    print (request.load_all())
+    books = request.load_all()
+    for book in books:
+        if book.original_title is not None:
+            print book.title
+            print(book.isbn, book.author, book.original_title)
 
     request.set = "iss-ndl-opac-inprocess"
 
