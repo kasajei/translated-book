@@ -11,6 +11,8 @@ const { Types, Creators } = createActions({
   searchSuccess: ['books'],
   amazonRequest: ["title", "original_title"],
   amazonSuccess: ["original_book", "translated_book", 'other_books'],
+  recentRequest: ["sort_id", "num"],
+  recentSuccess:['book_relations'],
   requestFailure: null
 });
 
@@ -23,6 +25,7 @@ export const INITIAL_STATE = Immutable({
   original_book: null,
   translated_book: null,
   other_books: [],
+  recent_book_relations: [],
   fetching: null,
   error: null,
 });
@@ -49,6 +52,14 @@ export const amazonSuccess = (state, action) => {
 };
 
 
+export const recentRequest = (state, {sort_id, num}) =>
+  state.merge({ recent_book_relations: []});
+
+export const recentSuccess = (state, action) => {
+  const { book_relations } = action;
+  return state.merge({ recent_book_relations: book_relations});
+};
+
 // failed to get the temperature
 export const requestFailure = (state) =>
   state.merge({ fetching: false, error: true, books: [] ,original_book:null, translated_book:null, other_books:[]});
@@ -61,4 +72,6 @@ export const reducer = createReducer(INITIAL_STATE, {
   [Types.REQUEST_FAILURE]: requestFailure,
   [Types.AMAZON_REQUEST]: amazonRequest,
   [Types.AMAZON_SUCCESS]: amazonSuccess,
+  [Types.RECENT_RQUEST]: recentRequest,
+  [Types.RECENT_SUCCESS]: recentSuccess,
 });

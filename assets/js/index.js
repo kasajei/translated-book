@@ -6,7 +6,8 @@ import { Router, Route, browserHistory } from 'react-router';
 import { syncHistoryWithStore } from 'react-router-redux'
 
 import MainView from './Containers/MainView';
-import PostView from './Containers/PostView';
+import RecentBookView from './Containers/RecentBookView';
+
 
 
 const store = createStore();
@@ -17,7 +18,7 @@ ReactDOM.render(
     <Provider store={store}>
       <Router history={history}>
         <Route exact path="/" component={MainView}/>
-        <Route path="/post" component={PostView}/>
+        <Route path="/recent" component={RecentBookView}/>
       </Router>
     </Provider>
   , document.getElementById('react-app')

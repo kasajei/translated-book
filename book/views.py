@@ -61,6 +61,7 @@ class SearchView(APIView):
         creator = request.GET.get("author", None)
 
         request = OpenSearch()
+        request.cnt = 20
         books = request.search(title, creator, isbn)
         books = self.remove(books)
         results = {
@@ -132,6 +133,7 @@ class AmazonView(APIView):
             if u"Book" in product.get_attribute("ProductGroup") and product.id not in ids:
                 books.append(product)
                 ids.append(product.id)
+                ids.append(product.isbn)
         return books
 
 
@@ -184,7 +186,15 @@ class AmazonView(APIView):
         except:
             return Response()
 
-        products = amazon.search_n(20, Keywords=keyword, SearchIndex=u'All')
+        try:
+            products = amazon.search_n(20, Keywords=keyword, SearchIndex=u'All')
+        except UnicodeEncodeError:
+            return Response({
+                "isbn_prodcut": None,
+                "translated_product": None,
+                "original_product": None,
+                "other_books":[]
+            })
         products = self.remove(products)
 
         isbn_product = None
@@ -220,7 +230,7 @@ class RecentBookView(APIView):
                     type: integer
                     paramType: query
         """
-        page_size = int(request.GET.get("num"))
+        page_size = int(request.GET.get("num", 25))
         queryset = BookRelation.objects
         if request.GET.get("sort_id"):
             queryset = queryset.filter(sort_id__lt=request.GET.get("sort_id"))

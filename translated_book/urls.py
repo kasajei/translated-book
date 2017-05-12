@@ -28,8 +28,11 @@ urlpatterns = (
 
     url(r'^api/v1/', include('book.urls.api')),
     url(r'^tasks/', include('book.urls.task')),
-    url(r'^$', TemplateView.as_view(template_name='index.html'), name='index'),
 )
 
 if settings.DEBUG:
     urlpatterns += tuple(static(settings.STATIC_URL, view=serve, show_indexes=True))
+
+urlpatterns += tuple(
+    [url(r'^.*$', TemplateView.as_view(template_name='index.html'), name='index')]
+)

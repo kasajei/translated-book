@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 
 import logging
 
+from django.db import IntegrityError
 from django.db.models import Q
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -104,8 +105,11 @@ class SaveAmazonTask(APIView):
         translated_book = None
         original_product = data["original_product"]
         original_book = None
-        if original_product.get("asin", None) and original_product.get("publication_date", None):
-            original_book, is_created = Book.objects.get_or_create(**original_product)
+        if original_product and original_product.get("asin", None) and original_product.get("publication_date", None):
+            try:
+                original_book, is_created = Book.objects.get_or_create(**original_product)
+            except IntegrityError:
+                pass
 
 
         request.GET = {"isbn": isbn}
@@ -113,8 +117,11 @@ class SaveAmazonTask(APIView):
         data = response.data
         translated_product = data["isbn_product"]
         translated_product["isbn"] = isbn
-        if translated_product.get("asin", None) and translated_product.get("publication_date", None):
-            translated_book, is_created = Book.objects.get_or_create(**translated_product)
+        if translated_product and translated_product.get("asin", None) and translated_product.get("publication_date", None):
+            try:
+                translated_book, is_created = Book.objects.get_or_create(**translated_product)
+            except IntegrityError:
+                pass
 
         if translated_book:
             book_relation, is_created = BookRelation.objects.get_or_create(
