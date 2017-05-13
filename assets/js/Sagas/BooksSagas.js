@@ -29,15 +29,3 @@ export function * amazonBooks (api, action) {
     yield put(BooksActions.requestFailure());
   }
 }
-
-export function * recentBooks (api, action) {
-  const {sort_id, num} = action;
-  const response = yield call(api.recent, sort_id, num);
-
-  if (response.ok) {
-    const book_relations = response.data.book_relations;
-    yield put(BooksActions.recentSuccess(book_relations));
-  } else {
-    yield put(BooksActions.requestFailure());
-  }
-}

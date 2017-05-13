@@ -10,6 +10,7 @@ export default () => {
   const rootReducer = combineReducers({
     routing: routerReducer,
     booking: require('./BooksRedux').reducer,
+    recenting: require('./RecentRedux').reducer,
   });
 
   return configureStore(rootReducer, rootSaga)

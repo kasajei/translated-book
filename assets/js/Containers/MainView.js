@@ -1,9 +1,11 @@
 import React from 'react';
 import { Link } from 'react-router';
 import BooksActions from '../Redux/BooksRedux'
+import RecentActions from '../Redux/RecentRedux'
 import { connect } from 'react-redux'
 import Footer from '../Component/Footer'
 import Header from '../Component/Header'
+import Amazon from '../Component/Amazon'
 
 class Book extends React.Component{
   constructor(props){
@@ -25,55 +27,6 @@ class Book extends React.Component{
         </li>
       </a>
     );
-  }
-}
-
-class Amazon extends React.Component{
-  render(){
-    if (this.props.amazon && this.props.amazon.title) {
-      const style = {
-        minWidth: 360
-      };
-      return (
-        <a href={this.props.amazon.offer_url} target="_blank">
-              <div className="box media" style={style}>
-               <figure className="media-left">
-                  <p className="image">
-                     <img src={this.props.amazon.medium_image_url}/>
-                  </p>
-               </figure>
-               <div className="media-content">
-                  <div className="content">
-                     <p><strong>{this.props.amazon.title} </strong><br/>
-                       <small>{this.props.amazon.author}</small>
-                     </p>
-                  </div>
-               </div>
-              </div>
-          </a>
-      );
-    }else{
-      return (
-        <a>
-          <div className="column">
-                <article className="box media">
-                 <figure className="media-left">
-                    <p className="image">
-                       <img src="https://placeholdit.imgix.net/~text?txtsize=12&txt=NoImage&w=111&h=160"/>
-                    </p>
-                 </figure>
-                 <div className="media-content">
-                    <div className="content">
-                       <p><strong>見つかりませんでした。</strong><br/>
-                         <small>見つかりませんでした</small>
-                       </p>
-                    </div>
-                 </div>
-                </article>
-          </div>
-        </a>
-      );
-    }
   }
 }
 
@@ -284,7 +237,7 @@ const mapStateToProps = (state) => {
     translated_book: state.booking.translated_book,
     other_books: state.booking.other_books,
     fetching: state.booking.fetching,
-    recent_book_relations: state.booking.recent_book_relations,
+    recent_book_relations: state.recenting.recent_book_relations,
   }
 };
 
@@ -293,7 +246,7 @@ const mapDispatchToProps = (dispatch) => {
     searchBooks: (isbn, title, author) => dispatch(BooksActions.searchRequest(isbn, title, author)),
     amazonBooks: (title, original_title) => dispatch(BooksActions.amazonRequest(title, original_title)),
     selectBook: (book) => dispatch(BooksActions.selectBook(book)),
-    recentBooks: (sort_id, num) => dispatch(BooksActions.recentRequest(sort_id, num))
+    recentBooks: (sort_id, num) => dispatch(RecentActions.recentRequest(sort_id, num))
   }
 };
 

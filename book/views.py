@@ -246,8 +246,8 @@ class RecentBookView(APIView):
             many=True
         ).data
         last_sort_id = None
-        queryset_size = len(queryset_json)
-        if queryset_size == page_size:
+        logging.info(len(queryset_json))
+        if len(queryset_json) == page_size:
             last_sort_id = queryset_json[-1]["sort_id"]
         resutls = {
             "last_sort_id": last_sort_id,
