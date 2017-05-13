@@ -32,7 +32,7 @@ export default class Header extends React.Component{
       <header className="nav has-shadow">
           <div className="nav-left">
               <span className="nav-item">
-                  <span className="fa fa-book"></span>　翻訳本サーチα
+               <span className="fa fa-book"></span>　<Link to="/">翻訳本サーチα</Link>
               </span>
           </div>
           <div className="nav-right">
