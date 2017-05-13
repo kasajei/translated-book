@@ -1,7 +1,11 @@
 import React from 'react';
 import { Link } from 'react-router';
 import BooksActions from '../Redux/BooksRedux'
+import RecentActions from '../Redux/RecentRedux'
 import { connect } from 'react-redux'
+import Footer from '../Component/Footer'
+import Header from '../Component/Header'
+import Amazon from '../Component/Amazon'
 
 class Book extends React.Component{
   constructor(props){
@@ -26,54 +30,6 @@ class Book extends React.Component{
   }
 }
 
-class Amazon extends React.Component{
-  render(){
-    if (this.props.amazon && this.props.amazon.title) {
-      return (
-        <a href={this.props.amazon.offer_url} target="_blank">
-        <div className="column">
-              <article className="box media">
-               <figure className="media-left">
-                  <p className="image">
-                     <img src={this.props.amazon.medium_image_url}/>
-                  </p>
-               </figure>
-               <div className="media-content">
-                  <div className="content">
-                     <p><strong>{this.props.amazon.title} </strong><br/>
-                       <small>{this.props.amazon.author}</small>
-                     </p>
-                  </div>
-               </div>
-              </article>
-        </div>
-          </a>
-      );
-    }else{
-      return (
-        <a>
-          <div className="column">
-                <article className="box media">
-                 <figure className="media-left">
-                    <p className="image">
-                       <img src="https://placeholdit.imgix.net/~text?txtsize=12&txt=NoImage&w=111&h=160"/>
-                    </p>
-                 </figure>
-                 <div className="media-content">
-                    <div className="content">
-                       <p><strong>見つかりませんでした。</strong><br/>
-                         <small>見つかりませんでした</small>
-                       </p>
-                    </div>
-                 </div>
-                </article>
-          </div>
-        </a>
-      );
-    }
-  }
-}
-
 
 class MainView extends React.Component{
   constructor(prop){
@@ -90,6 +46,11 @@ class MainView extends React.Component{
     this.search = this.search.bind(this);
     this.handleKeyPress = this.handleKeyPress.bind(this);
     this.renderBooks = this.renderBooks.bind(this);
+  }
+  componentWillMount(){
+    if (this.props.recent_book_relations.length === 0) {
+      this.props.recentBooks(null, null)
+    }
   }
   componentWillReceiveProps(newProps){
     if (newProps.books != this.props.books && newProps.books.length > 0){
@@ -133,9 +94,9 @@ class MainView extends React.Component{
     return (
       this.props.books.map(function (book) {
         if (selected_book){
-          is_active = (selected_book.title == book.title && selected_book.original_title == book.original_title)
+          is_active = (selected_book.isbn == book.isbn)
         }
-        return <Book book={book} selectBook={selectBook} is_active={is_active} key={book.id}/>
+        return <Book book={book} selectBook={selectBook} is_active={is_active} key={book.isbn}/>
       })
     )
   }
@@ -166,17 +127,37 @@ class MainView extends React.Component{
   renderOthers(){
     return(
       this.props.other_books.map(function (amazon) {
-        return <Amazon amazon={amazon} key={amazon.id}/>
+        return <Amazon amazon={amazon} key={amazon.asin}/>
       })
     )
+  }
+  renderRecent(){
+    if (this.props.recent_book_relations.length > 0){
+      return(
+        <div className="container is-fluid">
+          <h2 className="subtitle is-bold"><Link to="/recent">新刊の翻訳本</Link></h2>
+          <div className="columns" style={{overflow:"scroll"}}>
+          {
+            this.props.recent_book_relations.map(function (book_relation){
+              return <Amazon amazon={book_relation.translated_book} key={book_relation.translated_book.asin}/>
+            })
+          }
+          </div>
+        </div>
+      )
+    }
   }
   renderMain(){
     if (this.props.books.length > 0 && !this.props.fetching){
       return(
         <div className="column">
+          <h2 className="subtitle is-bold">翻訳本</h2>
           {this.renderAmazon()}
           <hr/>
-          {this.renderOthers()}
+          <h2 className="subtitle is-bold">関連書</h2>
+          <div className="container">
+              {this.renderOthers()}
+          </div>
         </div>
       )
     }else if(this.props.fetching) {
@@ -205,7 +186,8 @@ class MainView extends React.Component{
   render(){
     return (
       <div>
-        <header className="hero is-bold is-info is-medium">
+        <Header page="/"/>
+        <div className="hero is-bold is-info is-medium">
           <div className="hero-body">
             <div className="container">
               <h1 className="title has-text-centered">翻訳本サーチα</h1>
@@ -229,7 +211,7 @@ class MainView extends React.Component{
               </div>
             </div>
           </div>
-        </header>
+        </div>
         <section className="level"></section>
         <div className="container is-fluid">
           <main className="columns">
@@ -238,20 +220,9 @@ class MainView extends React.Component{
   　　　　　</main>
         </div>
         <section className="level"></section>
-          <footer className="footer">
-            <div className="container">
-              <div className="content has-text-centered">
-                <p>
-                  <strong>翻訳本サーチ</strong> by <a href="http://twitter.com/kasajei">@kasajei</a>
-                </p>
-                <p>
-                  <a className="icon" href="https://github.com/kasajei/translated-book">
-                    <i className="fa fa-github"></i>
-                  </a>
-                </p>
-              </div>
-            </div>
-          </footer>
+            {this.renderRecent()}
+        <section className="level"></section>
+          <Footer/>
         </div>
     );
   }
@@ -266,6 +237,7 @@ const mapStateToProps = (state) => {
     translated_book: state.booking.translated_book,
     other_books: state.booking.other_books,
     fetching: state.booking.fetching,
+    recent_book_relations: state.recenting.recent_book_relations,
   }
 };
 
@@ -273,7 +245,8 @@ const mapDispatchToProps = (dispatch) => {
   return {
     searchBooks: (isbn, title, author) => dispatch(BooksActions.searchRequest(isbn, title, author)),
     amazonBooks: (title, original_title) => dispatch(BooksActions.amazonRequest(title, original_title)),
-    selectBook: (book) => dispatch(BooksActions.selectBook(book))
+    selectBook: (book) => dispatch(BooksActions.selectBook(book)),
+    recentBooks: (sort_id, num) => dispatch(RecentActions.recentRequest(sort_id, num))
   }
 };
 

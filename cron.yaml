@@ -1,0 +1,11 @@
+cron:
+- description: featch new books
+  url: /tasks/fetch/new_books
+  schedule: every 24 hours
+  target: 2
+
+
+- description: featch progress books
+  url: /tasks/fetch/progress_books
+  schedule: every 24 hours
+  target: 2

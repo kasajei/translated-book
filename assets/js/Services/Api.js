@@ -24,10 +24,16 @@ const create = (baseURL = ROOT_URL) => {
     "original_title": original_title,
   });
 
+  const recent = (sort_id, num) => api.get('/book/', {
+    "sort_id": sort_id,
+    "num": num,
+  });
+
   return {
     // a list of the API functions from step 2
     search,
     amazon,
+    recent,
   }
 };
 
