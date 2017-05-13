@@ -1,5 +1,5 @@
 application: translated-book
-version: 2
+version: 3
 runtime: python27
 api_version: 1
 threadsafe: true
@@ -29,18 +29,18 @@ handlers:
 
 # library static file
 - url: /static/admin/
-  static_dir: sitepackages/django/contrib/admin/static/admin/
+  static_dir: sitepackages/prod/django/contrib/admin/static/admin/
   secure: optional
   expiration: 30d
 
 
 - url: /static/rest_framework/
-  static_dir: sitepackages/rest_framework/static/rest_framework/
+  static_dir: sitepackages/prod/rest_framework/static/rest_framework/
   secure: optional
   expiration: 30d
 
 - url: /static/rest_framework_swagger/
-  static_dir: sitepackages/rest_framework_swagger/static/rest_framework_swagger/
+  static_dir: sitepackages/prod/rest_framework_swagger/static/rest_framework_swagger/
   secure: optional
   expiration: 30d
 
@@ -63,7 +63,7 @@ handlers:
 - url: /tasks/.*
   script: translated_book.wsgi.application
   login: admin
-  secure: always
+  secure: optional
 
 
 - url: /.*

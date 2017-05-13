@@ -15,7 +15,8 @@ STATIC_URL = '/static/'
 SECURE_REDIRECT_EXEMPT = [
     # App Engine doesn't use HTTPS internally, so the /_ah/.* URLs need to be exempt.
     # Django compares these to request.path.lstrip("/"), hence the lack of preceding /
-    r"^_ah/"
+    r"^_ah/",
+    r"tasks",
 ]
 
 DEBUG = False
@@ -29,7 +30,7 @@ WEBPACK_LOADER['DEFAULT'].update({
 # Django error pages in DEBUG mode render necessary styles
 if "'unsafe-inline'" in CSP_STYLE_SRC:
     CSP_STYLE_SRC = list(CSP_STYLE_SRC)
-    CSP_STYLE_SRC.remove("'unsafe-inline'")
+    # CSP_STYLE_SRC.remove("'unsafe-inline'")
     CSP_STYLE_SRC = tuple(CSP_STYLE_SRC)
 
 # Add the cached template loader for the Django template system (not for Jinja)

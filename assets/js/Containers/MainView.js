@@ -49,7 +49,7 @@ class MainView extends React.Component{
   }
   componentWillMount(){
     if (this.props.recent_book_relations.length === 0) {
-      this.props.recentBooks(null, null)
+      this.props.recentBooks(null, 20)
     }
   }
   componentWillReceiveProps(newProps){

@@ -1,8 +1,12 @@
 # -*- coding: utf-8 -*-
+from djangae.contrib.gauth.middleware import AuthenticationMiddleware
 
-from rest_framework.authentication import SessionAuthentication
 
-class CsrfExemptSessionAuthentication(SessionAuthentication):
-
-    def enforce_csrf(self, request):
-        return  # To not perform the csrf check previously happening
+class CustomAuth(AuthenticationMiddleware):
+    def process_request(self, request):
+        path = str(request.path)
+        if path.startswith("/admin/"):
+            return super(CustomAuth, self).process_request(request)
+        if path.startswith("/docs/"):
+            return super(CustomAuth, self).process_request(request)
+        return None

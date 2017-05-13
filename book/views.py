@@ -18,6 +18,7 @@ from google.appengine.api.taskqueue import taskqueue
 
 from book.models import BookRelation
 from book.ndl.apis.opensearch import OpenSearch
+from book.ndl.apis.sru import SRU
 from book.serializers import BookRelationSerializer
 from translated_book.settings import AMAZON_ACCESS_KEY, AMAZON_ACCOS_TAG
 from translated_book.settings import AMAZON_ACCESS_SECRET
@@ -60,7 +61,7 @@ class SearchView(APIView):
         isbn = request.GET.get("isbn", None)
         creator = request.GET.get("author", None)
 
-        request = OpenSearch()
+        request = SRU()
         request.cnt = 20
         books = request.search(title, creator, isbn)
         books = self.remove(books)
@@ -69,7 +70,7 @@ class SearchView(APIView):
         }
         for book in books:
             taskqueue.add(
-                    url="/tasks/save/amazon/",
+                    url="/tasks/save/amazon",
                     params={
                         u"title": book.title,
                         u"original_title": book.original_title,

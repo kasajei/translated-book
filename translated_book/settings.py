@@ -52,8 +52,10 @@ INSTALLED_APPS = (
 MIDDLEWARE_CLASSES = (
     'djangae.contrib.security.middleware.AppEngineSecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'djangae.contrib.gauth.middleware.AuthenticationMiddleware',
+    # 'djangae.contrib.gauth.middleware.AuthenticationMiddleware',
+    'translated_book.auth.CustomAuth',
     'django.contrib.messages.middleware.MessageMiddleware',
     'csp.middleware.CSPMiddleware',
     'session_csrf.CsrfMiddleware',
@@ -145,7 +147,6 @@ CSP_CONNECT_SRC = ("'self'", "plus.google.com", "www.google-analytics.com", "loc
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        "translated_book.auth.CsrfExemptSessionAuthentication"
     ],
 }
 

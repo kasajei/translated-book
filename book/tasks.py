@@ -36,7 +36,7 @@ class FetchNewBooksTask(APIView):
         for book in books:
             if book.original_title is not None:
                 taskqueue.add(
-                    url="/tasks/save/amazon/",
+                    url="/tasks/save/amazon",
                     params={
                         u"title": book.title,
                         u"original_title": book.original_title,
@@ -66,7 +66,7 @@ class FetchProgressBooksTask(APIView):
         for book in books:
             if book.original_title is not None:
                 taskqueue.add(
-                    url="/tasks/save/amazon/",
+                    url="/tasks/save/amazon",
                     params={
                         u"title": book.title,
                         u"original_title": book.original_title,
