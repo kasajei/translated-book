@@ -4,7 +4,7 @@ import RecentActions from '../Redux/RecentRedux'
 import { connect } from 'react-redux'
 import Footer from '../Component/Footer'
 import Header from '../Component/Header'
-import Amazon from '../Component/Amazon'
+import BookRelation from '../Component/BookRelation'
 
 
 Array.prototype.chunk = function(n){
@@ -24,7 +24,7 @@ class RecentBookView extends React.Component{
   }
   componentWillMount(){
     if (this.props.recent_book_relations.length === 0) {
-      this.props.recentBooks(null, 20)
+      this.props.recentBooks(null, 24)
     }
   }
   renderRecent(){
@@ -34,7 +34,7 @@ class RecentBookView extends React.Component{
         <div className="columns">
           {
             book_relations.map(function (book_relation) {
-              return <Amazon amazon={book_relation.translated_book} key={book_relation.translated_book.asin}/>
+              return <BookRelation amazon={book_relation.translated_book} original={book_relation.original_book} key={book_relation.translated_book.asin}/>
             })
           }
         </div>
@@ -43,7 +43,7 @@ class RecentBookView extends React.Component{
     )
   }
   loadNext(){
-    this.props.recentBooks(this.props.last_sort_id, 20)
+    this.props.recentBooks(this.props.last_sort_id, 24)
   }
   renderNext(){
     if(this.props.last_sort_id){
