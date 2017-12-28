@@ -54,6 +54,11 @@ handlers:
   secure: always
   login: admin
 
+- url: /manage.*
+  script: translated_book.wsgi.application
+  secure: always
+  login: admin
+
 - url: /docs.*
   script: translated_book.wsgi.application
   login: admin

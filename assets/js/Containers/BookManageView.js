@@ -17,10 +17,11 @@ Array.prototype.chunk = function(n){
 };
 
 
-class RecentBookView extends React.Component{
+class BookManageView extends React.Component{
   constructor(props){
     super(props);
     this.loadNext = this.loadNext.bind(this);
+    this.seenRequests = this.seenRequests.bind(this);
   }
   componentWillMount(){
     if (this.props.recent_book_relations.length === 0) {
@@ -45,10 +46,14 @@ class RecentBookView extends React.Component{
   loadNext(){
     this.props.recentBooks(this.props.last_sort_id, 24)
   }
+  seenRequests(){
+    this.props.seenBooks(this.props.last_sort_id)
+  }
   renderNext(){
     if(this.props.last_sort_id){
       return(
         <div className="has-text-centered">
+          <button className={`button is-large ${this.props.fetching ? "is-loading" : ""}`} onClick={this.seenRequests}>確認</button>
           <button className={`button is-large ${this.props.fetching ? "is-loading" : ""}`} onClick={this.loadNext}>さらに読み込み</button>
         </div>
       )
@@ -89,8 +94,9 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    recentBooks: (sort_id, num) => dispatch(RecentActions.recentRequest(sort_id, num, false))
+    recentBooks: (sort_id, num) => dispatch(RecentActions.recentRequest(sort_id, num, true)),
+    seenBooks: (sort_id) => dispatch(RecentActions.seenRequest(sort_id))
   }
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(RecentBookView)
+export default connect(mapStateToProps, mapDispatchToProps)(BookManageView)

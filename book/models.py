@@ -89,6 +89,9 @@ class BookRelation(models.Model):
         blank=True
     )
     publication_date = models.DateField()
+    is_seen = models.BooleanField(
+        default=False,
+    )
     created = models.DateTimeField(
         auto_now_add=True
     )

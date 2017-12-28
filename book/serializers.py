@@ -27,6 +27,7 @@ class BookRelationSerializer(serializers.ModelSerializer):
     class Meta:
         model = BookRelation
         fields = (
+            "id",
             "title",
             "original_title",
             "translated_book",

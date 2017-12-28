@@ -19,6 +19,17 @@ indexes:
 
 - kind: book_bookrelation
   properties:
+  - name: __key__
+    direction: desc
+
+- kind: book_bookrelation
+  properties:
+  - name: is_seen
+  - name: sort_id
+    direction: desc
+
+- kind: book_bookrelation
+  properties:
   - name: original_book_id
   - name: publication_date
     direction: desc

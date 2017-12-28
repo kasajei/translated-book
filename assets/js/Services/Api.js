@@ -24,16 +24,24 @@ const create = (baseURL = ROOT_URL) => {
     "original_title": original_title,
   });
 
-  const recent = (sort_id, num) => api.get('/book/', {
+  const recent = (sort_id, num, is_manage) => api.get('/book/', {
     "sort_id": sort_id,
     "num": num,
+    "is_manage": is_manage
   });
+
+  const seen = (sort_id) => {
+    var data = new FormData();
+    data.append("sort_id", sort_id);
+    return api.post('/book/', data)
+  };
 
   return {
     // a list of the API functions from step 2
     search,
     amazon,
     recent,
+    seen,
   }
 };
 

@@ -10,6 +10,7 @@ from amazon.api import AmazonAPI
 import re
 
 # Create your views here.
+from django.db.models import Q
 from rest_framework.response import Response
 from rest_framework.views import APIView
 import requests_toolbelt.adapters.appengine
@@ -228,9 +229,15 @@ class RecentBookView(APIView):
                 -   name: num
                     type: integer
                     paramType: query
+                -   name: is_manage 
+                    type: bool
+                    paramType: query
         """
         page_size = int(request.GET.get("num", 25))
         queryset = BookRelation.objects
+        is_true = lambda value: bool(value) and value.lower() not in ('false', '0')
+        if is_true(request.GET.get("is_manage", False)):
+            queryset = queryset.filter(is_seen=False)
         if request.GET.get("sort_id"):
             queryset = queryset.filter(sort_id__lt=request.GET.get("sort_id"))
 
@@ -248,8 +255,37 @@ class RecentBookView(APIView):
         logging.info(len(queryset_json))
         if len(queryset_json) == page_size:
             last_sort_id = queryset_json[-1]["sort_id"]
+        elif is_true(request.GET.get("is_manage", False)):
+            if len(queryset_json):
+                last_sort_id = queryset_json[-1]["sort_id"]
+            else:
+                last_sort_id = request.GET.get("sort_id")
+
         resutls = {
             "last_sort_id": last_sort_id,
             "book_relations": queryset_json
         }
         return Response(resutls)
+
+
+    def post(self, request):
+        """
+        最新の翻訳本を取得する
+        ---
+        parameters:
+                -   name: sort_id
+                    type: string
+        """
+        logging.info(request.POST)
+        if request.POST.get("sort_id"):
+            logging.info(request.POST.get("sort_id"))
+            queryset = BookRelation.objects
+            queryset = queryset.filter(is_seen=False)
+            queryset = queryset.filter(sort_id__gte=request.POST.get("sort_id")).order_by("-sort_id")
+            queryset.update(is_seen=True)
+        return Response({})
+
+
+    def delete(self, request):
+        BookRelation.objects.update(is_seen=False)
+        return Response({})
