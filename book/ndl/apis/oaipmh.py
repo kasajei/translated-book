@@ -48,6 +48,10 @@ class OAIPMH(object):
         root = ElementTree.fromstring(xml.encode('utf-8'))
         list_records = root.find("{http://www.openarchives.org/OAI/2.0/}ListRecords")
         books = []
+        if list_records is None:
+            self.has_next = False
+            self.__resumption_token = None
+            return books
         for record in list_records:
             metadata = record.find("{http://www.openarchives.org/OAI/2.0/}metadata")
             if metadata is not None:

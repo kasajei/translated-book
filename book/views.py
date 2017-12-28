@@ -178,24 +178,22 @@ class AmazonView(APIView):
             ErrorHandler=self.error_handler
         )
         if isbn:
-            keyword = isbn
+            keyword = isbn.replace("-", "")
         else:
             keyword = u'"'+title+u'"|"'+original_title+u'"'
 
-        try:
-            logging.info(urllib.quote(keyword.encode("utf-8")))
-        except:
-            return Response()
 
         try:
             products = amazon.search_n(20, Keywords=keyword, SearchIndex=u'All')
         except UnicodeEncodeError:
             return Response({
-                "isbn_prodcut": None,
+                "isbn_product": None,
                 "translated_product": None,
                 "original_product": None,
                 "other_books":[]
             })
+
+        logging.info(products)
         products = self.remove(products)
 
         isbn_product = None

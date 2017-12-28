@@ -3,7 +3,7 @@ queue:
   retry_parameters:
     task_retry_limit: 3
   rate: 5/s
-  bucket_size: 10
+  bucket_size: 1
 
 
 - name: mapreduce

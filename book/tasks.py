@@ -17,62 +17,76 @@ from google.appengine.api.taskqueue import taskqueue
 
 
 class FetchNewBooksTask(APIView):
-    def post(self, request):
+    def get(self, request):
         """
         新刊情報を取得する
         ---
         parameters:
                 -   name: from_date
                     type: string
+                    paramType: query
+                -   name: days
+                    type: integer
+                    paramType: query
         """
         api = OAIPMH()
         logging.info(api.URL)
-        from_date_string = request.POST.get("from_date", None)
-        if from_date_string is not None:
-            from_datetime = datetime.strptime(from_date_string, "%Y-%m-%d")
-            api.from_date = from_datetime.date()
-            api.until_date = (from_datetime + timedelta(days=1)).date()
-        books = api.load_all()
-        for book in books:
-            if book.original_title is not None:
-                taskqueue.add(
-                    url="/tasks/save/amazon",
-                    params={
-                        u"title": book.title,
-                        u"original_title": book.original_title,
-                        u"isbn": book.isbn
-                    }
-                )
+        from_date_string = request.GET.get("from_date", None)
+        days = int(request.GET.get("days", 1))
+        for i in range(0, days):
+            if from_date_string is not None:
+                from_datetime = datetime.strptime(from_date_string, "%Y-%m-%d")
+                api.from_date = (from_datetime + timedelta(days=-i)).date()
+                api.until_date = (from_datetime + timedelta(days=-i+1)).date()
+            books = api.load_all()
+            for book in books:
+                if book.original_title is not None:
+                    taskqueue.add(
+                        url="/tasks/save/amazon",
+                        params={
+                            u"title": book.title,
+                            u"original_title": book.original_title,
+                            u"isbn": book.isbn
+                        }
+                    )
+            logging.info(api.from_date)
         return Response({})
 
 
 class FetchProgressBooksTask(APIView):
-    def post(self, request):
+    def get(self, request):
         """
         新刊情報を取得する
         ---
         parameters:
                 -   name: from_date
                     type: string
+                    paramType: query
+                -   name: days
+                    type: integer
+                    paramType: query
         """
         api = OAIPMH()
         api.set = "iss-ndl-opac-inprocess"
-        from_date_string = request.POST.get("from_date", None)
-        if from_date_string is not None:
-            from_datetime = datetime.strptime(from_date_string, "%Y-%m-%d")
-            api.from_date = from_datetime.date()
-            api.until_date = (from_datetime + timedelta(days=1)).date()
-        books = api.load_all()
-        for book in books:
-            if book.original_title is not None:
-                taskqueue.add(
-                    url="/tasks/save/amazon",
-                    params={
-                        u"title": book.title,
-                        u"original_title": book.original_title,
-                        u"isbn": book.isbn
-                    }
-                )
+        from_date_string = request.GET.get("from_date", None)
+        days = int(request.GET.get("days", 1))
+        for i in range(0, days):
+            if from_date_string is not None:
+                from_datetime = datetime.strptime(from_date_string, "%Y-%m-%d")
+                api.from_date = (from_datetime + timedelta(days=-i)).date()
+                api.until_date = (from_datetime + timedelta(days=-i+1)).date()
+            books = api.load_all()
+            for book in books:
+                if book.original_title is not None:
+                    taskqueue.add(
+                        url="/tasks/save/amazon",
+                        params={
+                            u"title": book.title,
+                            u"original_title": book.original_title,
+                            u"isbn": book.isbn
+                        }
+                    )
+            logging.info(api.from_date)
         return Response({})
 
 
@@ -89,12 +103,12 @@ class SaveAmazonTask(APIView):
                 -   name: isbn
                     type: string
         """
-        isbn = str(request.POST.get("isbn", ""))
+        isbn = request.POST.get("isbn", "")
         title = request.POST.get("title", "")
         original_title = request.POST.get("original_title", "")
+        logging.info(title)
 
         if Book.objects.filter(isbn=str(isbn)).exists():
-            logging.info(title + u"はすでにあったよ!")
             return Response({})
 
         amazon = AmazonView()
@@ -116,9 +130,9 @@ class SaveAmazonTask(APIView):
         response = amazon.get(request)
         data = response.data
         translated_product = data["isbn_product"]
-        translated_product["isbn"] = isbn
         if translated_product and translated_product.get("asin", None) and translated_product.get("publication_date", None):
             try:
+                translated_product["isbn"] = isbn
                 translated_book, is_created = Book.objects.get_or_create(**translated_product)
             except IntegrityError:
                 pass
